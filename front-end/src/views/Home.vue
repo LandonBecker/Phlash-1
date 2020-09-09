@@ -85,6 +85,11 @@ export default {
       dateToBeDeleted: null
     };
   },
+  watch: {
+    phageID() {
+      this.phageID = this.phageID.replace(/[^a-zA-Z0-9_]/g, '');
+    }
+  },
   computed: {
     navUpload: function() {
       if (this.phageID !== "") return true;
