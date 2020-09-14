@@ -106,7 +106,7 @@ def check_phage_id(phage_id):
 
 
 @app.route('/phlash_api/check_upload/<current_user>', methods=['GET'])
-def upload_files(current_user):
+def check_upload(current_user):
     """
     API endpoint for '/upload/:current_user'.
     POST method uploads files accordingly and removes files if necessary.
@@ -137,7 +137,7 @@ def upload_files(current_user):
     return jsonify(response_object)
 
 @app.route('/phlash_api/upload/<current_user>', methods=['POST'])
-def upload_files(current_user):
+def upload(current_user):
     """
     API endpoint for '/upload/:current_user'.
     POST method uploads files accordingly and removes files if necessary.
