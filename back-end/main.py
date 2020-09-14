@@ -136,7 +136,7 @@ def upload_files(current_user):
 
     return jsonify(response_object)
 
-    @app.route('/phlash_api/upload/<current_user>', methods=['POST'])
+@app.route('/phlash_api/upload/<current_user>', methods=['POST'])
 def upload_files(current_user):
     """
     API endpoint for '/upload/:current_user'.
