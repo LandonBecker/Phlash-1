@@ -46,6 +46,12 @@
               <li><strong>Database:</strong> Non-redundant protein sequences (nr)</li>
               <li><strong>Algorithm:</strong> blastp (protein-protein BLAST)</li>
             </ul>
+            <div class="alert alert-warning" v-if="clickedNCBI">
+              This will take several minutes. If it seems to be taking a long time, it is still probably working correctly. For help troubleshooting, visit the FAQ.
+              <button class="btn btn-light btn-step" @click="goToHelp">
+                <strong>Go to BLAST help page</strong>
+              </button>
+            </div>
             <button class="btn btn-light btn-step" @click="goToNCBI">
               <strong>Go to NCBI's BLASTp</strong>
             </button>
@@ -134,7 +140,7 @@ export default {
       blastFile: null,
       showBlastFile: false,
       showBlastDangerAlert: false,
-      showBlastSuccessAlert: false
+      showBlastSuccessAlert: false,
     };
   },
   created() {
@@ -192,7 +198,13 @@ export default {
         "https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE=Proteins",
         "_blank"
       );
-      this.clickedNCBI = true;
+      this.clickedNCBI = !this.clickedNCBI;
+    },
+    goToHelp() {
+      window.open(
+        "https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=Blastdocs",
+        "_blank"
+      );
     },
     handleFileUpload() {
       this.blastFile = document.querySelector(
@@ -353,5 +365,15 @@ h1 {
   display: block;
   margin: auto;
   width: 100%;
+}
+.information-box {
+  border: 3px solid F7DD7E;
+  color: F7DD7E;
+  background-color: F7DD7E;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  width: 20%;
+  font-size: 10px;
+  font-weight: bold;
 }
 </style>
