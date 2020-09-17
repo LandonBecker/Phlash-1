@@ -366,14 +366,4 @@ h1 {
   margin: auto;
   width: 100%;
 }
-.information-box {
-  border: 3px solid F7DD7E;
-  color: F7DD7E;
-  background-color: F7DD7E;
-  padding-top: 20px;
-  padding-bottom: 20px;
-  width: 20%;
-  font-size: 10px;
-  font-weight: bold;
-}
 </style>
