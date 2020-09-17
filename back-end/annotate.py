@@ -96,7 +96,6 @@ def parse_dnamaster_genbank(genbank_file):
 def parse_genemark_ldata(gm_file):
     genemark_all_genes = dict()
     with open(gm_file, "r") as handle:
-        print("It opens the file")
         for line in handle:
             if line == '\n':
                 break
