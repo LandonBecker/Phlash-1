@@ -11,7 +11,7 @@
           Welcome to <strong><i>Phlash</i></strong>!
         </p>
         <p>Enter an ID for your bacteriphage below to get started.
-          <em>Please note that your ID must only contain letters and numbers and will be removed after 90 days.</em>
+          <em>Please note that your ID will be removed after 90 days.</em>
         </p>
         <div class="input-group mb-3">
           <input
@@ -19,7 +19,7 @@
             type="text"
             v-model="phageID"
             v-on:keyup.enter="checkPhageID(phageID)"
-            placeholder="Enter a unique bacteriophage ID"
+            placeholder="Enter a unique bacteriophage ID containing letters and numbers only"
             aria-label="Enter a unique bacteriophage ID"
             aria-describedby="basic-addon2"
           />
