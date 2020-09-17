@@ -54,7 +54,6 @@ def run_genemark(fasta_file_path):
     gdata_file_path = "{}.gdata".format(fasta_file_path)
     ldata_file_path = "{}.ldata".format(fasta_file_path)
 
-
 def parse_dnamaster_genbank(genbank_file):
     """
     Parses through DNA Master GenBank file to gather DNA Master's CDS calls. 
@@ -97,6 +96,7 @@ def parse_dnamaster_genbank(genbank_file):
 def parse_genemark_ldata(gm_file):
     genemark_all_genes = dict()
     with open(gm_file, "r") as handle:
+        print("It opens the file")
         for line in handle:
             if line == '\n':
                 break
@@ -115,7 +115,6 @@ def parse_genemark_ldata(gm_file):
                     for key in curr_keys:
                         if key != max_right:
                             del genemark_all_genes[key]
-
     genemark_cdss = dict()
     with open(gm_file, "r") as handle:
         for line in handle:
@@ -146,7 +145,6 @@ def parse_genemark_ldata(gm_file):
                                 db.session.add(cds)
                                 db.session.commit()
                     id_number += 1
-
 
 # Compare the gene calls between each tool
 def compare():
