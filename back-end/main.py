@@ -8,6 +8,7 @@ from Bio import SeqIO, Seq
 from pathlib import Path
 from models import *
 import os
+import errno
 import shutil
 import datetime
 import uuid
@@ -175,7 +176,11 @@ def upload(current_user):
                 if file_ext in FASTA_EXTENSIONS:  # run genemark and parse ldata
                     fasta_file = get_file_path("fasta", UPLOAD_FOLDER)
                     annotate.run_genemark(fasta_file)
-                    ldata_file = get_file_path("ldata", UPLOAD_FOLDER)
+                    try:
+                        ldata_file = get_file_path("ldata", UPLOAD_FOLDER)
+                    except FileNotFoundError:
+                        print("GeneMark did not save ldata file properly")
+                        return("error")
                     annotate.parse_genemark_ldata(ldata_file)
                 elif file_ext in GENBANK_EXTENSIONS:  # parse genbank
                     genbank_file = get_file_path("genbank", UPLOAD_FOLDER)
@@ -483,3 +488,4 @@ def get_file_path(preference, upload_directory):
                 return os.path.join(upload_directory, filename)
         else:
             return("Couldn't find file.")
+    raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), filename)
