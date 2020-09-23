@@ -309,6 +309,44 @@ def blast(current_user, file_method):
             f = open(os.path.join(ROOT, 'users', current_user,
                                   f"{current_user}_blast.fasta"), "r")
             return f.read()
+        elif file_method == "display":
+            json_files = []
+            for file in os.listdir(UPLOAD_FOLDER):
+                if file.endswith(".json"):
+                    print(os.path.join(UPLOAD_FOLDER, file))
+                    json_files.append(file)
+                    return open(os.path.join(UPLOAD_FOLDER, file), "r").read()
+            return "No file uploaded"
+        elif file_method == "name":
+            for file in os.listdir(UPLOAD_FOLDER):
+                if file.endswith(".json"):
+                    return file
+        elif file_method == "downloadJSON":
+            if 'file' not in request.files:
+                response_object["status"]: "'file' not in request.files"
+                print("in fail")
+            else:
+                print("in success")
+                file = request.files['file']
+                if file:
+                    file_name = secure_filename(file.filename)
+                    print(file_name)
+                    return open(os.path.join(UPLOAD_FOLDER, file_name)).read()
+                else:
+                    response_object["status"] = "error"
+        elif file_method == "remove":
+            if 'file' not in request.files:
+                response_object["status"]: "'file' not in request.files"
+                print("in fail")
+            else:
+                print("in success")
+                file = request.files['file']
+                if file:
+                    file_name = secure_filename(file.filename)
+                    print(file_name)
+                    os.remove(os.path.join(UPLOAD_FOLDER, file_name))
+                else:
+                    response_object["status"] = "error"
         elif file_method == "upload":
             if 'file' not in request.files:
                 response_object["status"]: "'file' not in request.files"
