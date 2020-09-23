@@ -47,7 +47,8 @@
               <li><strong>Algorithm:</strong> blastp (protein-protein BLAST)</li>
             </ul>
             <div class="alert alert-warning" v-if="clickedNCBI">
-              This will take several minutes. If it seems to be taking a long time, it is still probably working correctly. For help troubleshooting, visit the FAQ.
+              This will take several minutes. If it seems to be taking a long time, 
+              it is still probably working correctly. For help troubleshooting, visit the FAQ.
               <button class="btn btn-light btn-step" @click="goToHelp">
                 <strong>Go to BLAST help page</strong>
               </button>
@@ -55,7 +56,7 @@
             <button class="btn btn-light btn-step" @click="goToNCBI">
               <strong>Go to NCBI's BLASTp</strong>
             </button>
-            <!--<img id="step-two" src="<%= BASE_URL %>/images/blast_step2.png" />-->
+            <!-- <img id="step-two" src="<%= BASE_URL %>/images/blast_step2.png" /> -->
             <img id="step-two" src="/phlash/images/blast_step2.png" />
           </li>
           <li class="step">
@@ -69,6 +70,7 @@
           <li class="step">
             Upload your BLAST results.
             <div class="upload-wrapper">
+              <div class="alert alert-warning" id="blast-warning-alert" role="alert" v-if="showNoMoreFiles"></div>
               <div class="alert alert-success" id="blast-success-alert" role="alert" v-if="showBlastSuccessAlert"></div>
               <div class="alert alert-danger" id="blast-danger-alert" role="alert" v-if="showBlastDangerAlert"></div>
               <div class="upload">
@@ -88,6 +90,26 @@
               <button class="btn btn-dark btn-upload-submit" v-if="showBlastFile" @click="uploadFile()">
                 <strong>Upload</strong>
               </button>
+              <div class="file-list">
+                <ul>
+                  <li v-for="jsonFile in jsonFiles" v-bind:key="jsonFile">
+                    <button class="btn btn-light btn-download" @click="downloadJsonFile(jsonFile)">
+                      <strong>Download</strong> {{ jsonFile.name }}
+                      <svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-download" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                        <path fill-rule="evenodd" d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                      </svg>
+                    </button>
+                    <button class="btn btn-light btn-trash" @click="deleteFiles(jsonFile)">
+                      <strong>Delete</strong> {{ jsonFile.name }}
+                      <svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-trash" fill="this.backgroundColor" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                      </svg>
+                    </button>
+                  </li>
+                </ul>
+              </div>
             </div>
           </li>
         </ol>
@@ -138,14 +160,21 @@ export default {
       clickedNCBI: false,
       blast: false,
       blastFile: null,
+      jsonFiles: [],
       showBlastFile: false,
       showBlastDangerAlert: false,
       showBlastSuccessAlert: false,
+      showDeleteIcon: false,
+      numFiles: 1,
+      showNoMoreFiles: false,
     };
   },
+
   created() {
     this.checkIfFileUploaded();
+    this.displayFiles();
   },
+
   computed: {
     navUpload: function() {
       return true;
@@ -161,6 +190,7 @@ export default {
       else return false;
     },
   },
+
   watch: {
     blast: function() {
       if (this.blast) {
@@ -169,6 +199,7 @@ export default {
       }
     },
   },
+
   methods: {
     checkIfFileUploaded() {
       axios.get(process.env.VUE_APP_BASE_URL + `/blast/${this.$route.params.phageID}/none`)
@@ -179,6 +210,30 @@ export default {
           console.log(error);
         })
     },
+
+    downloadJsonFile(file) {
+      var data = new FormData();
+        data.append("file", file);
+        axios.post(process.env.VUE_APP_BASE_URL + `/blast/${this.$route.params.phageID}/downloadJSON`,
+            data,
+            {
+              headers: {
+                "Content-Type": "multipart/form-data"
+              }
+            }
+          )
+          .then(response => {
+          let data = response.data;
+          const blob = new Blob([data], { type: "application/fasta" });
+          let link = document.createElement("a");
+          link.href = window.URL.createObjectURL(blob);
+          link.download = `${file.name}`;
+          link.click();
+          this.downloadLoading = false;
+          this.fileDownloaded = true;
+        });
+    },
+
     downloadFile() {
       this.downloadLoading = true;
       axios.post(process.env.VUE_APP_BASE_URL + `/blast/${this.$route.params.phageID}/download`)
@@ -193,30 +248,41 @@ export default {
           this.fileDownloaded = true;
         });
     },
-    goToNCBI() {
-      window.open(
-        "https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE=Proteins",
-        "_blank"
-      );
-      this.clickedNCBI = !this.clickedNCBI;
+
+    getName() {
+      axios.post(process.env.VUE_APP_BASE_URL + `/blast/${this.$route.params.phageID}/name`)
+        .then(response => {
+            let data = response.data;
+            console.log(data);
+            return response.data;
+          });
     },
-    goToHelp() {
-      window.open(
-        "https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=Blastdocs",
-        "_blank"
-      );
+
+    displayFiles() {
+      axios.post(process.env.VUE_APP_BASE_URL + `/blast/${this.$route.params.phageID}/display`)
+        .then(response => {
+          let data = response.data;
+          if (data != "No file uploaded") {
+            const blob = new Blob([data], { type: "application/blast" });
+            axios.post(process.env.VUE_APP_BASE_URL + `/blast/${this.$route.params.phageID}/name`)
+              .then(response => {
+                let name = response.data;
+                console.log(name);
+                var file = new File([blob], name);
+                this.jsonFiles.push(file);
+              })
+          }
+        })
+        .catch(error => {
+          console.log(error);
+        })
     },
-    handleFileUpload() {
-      this.blastFile = document.querySelector(
-        "#blast-upload-form"
-      ).file.files[0];
-      this.showBlastFile = true;
-    },
-    uploadFile(e) {
-      this.blastLoading = true;
+
+    deleteFiles(jsonFile) {
+      this.showNoMoreFiles = false;
       var data = new FormData();
-      data.append("file", this.blastFile);
-      axios.post(process.env.VUE_APP_BASE_URL + `/blast/${this.$route.params.phageID}/upload`,
+      data.append("file", jsonFile);
+      axios.post(process.env.VUE_APP_BASE_URL + `/blast/${this.$route.params.phageID}/remove`,
           data,
           {
             headers: {
@@ -225,35 +291,97 @@ export default {
           }
         )
         .then(response => {
+          var index = this.jsonFiles.indexOf(jsonFile);
+          this.jsonFiles.splice(index, 1);
           console.log(response);
           if (typeof response.data.uploaded !== "undefined") {
-            let fileExt = response.data.uploaded.split(".").pop();
-            this.blastLoading = false;
-            this.showBlastSuccessAlert = true;
-            this.showBlastDangerAlert = false;
-            this.blast = true;
-            let successMessage = `<strong>${response.data.uploaded}</strong> uploaded successfully!`;
-            Vue.nextTick(() => {
-              document.getElementById(
-                "blast-success-alert"
-              ).innerHTML = successMessage;
-            });
           } else if (typeof response.data.not_allowed !== "undefined") {
             let fileExt = response.data.not_allowed.split(".").pop();
-            this.blastLoading = false;
-            this.showBlastDangerAlert = true;
-            this.showBlastSuccessAlert = false;
-            let dangerMessage = `<strong>${fileExt}</strong> is an unacceptable JSON file extension.`;
-            Vue.nextTick(() => {
-              document.getElementById(
-                "blast-danger-alert"
-              ).innerHTML = dangerMessage;
-            });
           }
         })
         .catch(error => {
           console.log(error);
         });
+    },
+
+    goToNCBI() {
+      window.open(
+        "https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE=Proteins",
+        "_blank"
+      );
+      this.clickedNCBI = !this.clickedNCBI;
+    },
+
+    goToHelp() {
+      window.open(
+        "https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=Blastdocs",
+        "_blank"
+      );
+    },
+
+    handleFileUpload() {
+      this.blastFile = document.querySelector(
+        "#blast-upload-form"
+      ).file.files[0];
+      this.showBlastFile = true;
+    },
+
+    uploadFile(e) {
+      if (this.jsonFiles.length == this.numFiles) {
+        this.showBlastDangerAlert = false;
+        this.showBlastSuccessAlert = false;
+        this.showNoMoreFiles = true;
+        let warningMessage = "You must remove a file before uploading another.";
+        Vue.nextTick(() => {
+                document.getElementById(
+                  "blast-warning-alert"
+                ).innerHTML = warningMessage;
+        });
+      }
+      else {
+        this.showNoMoreFiles = false;
+        this.blastLoading = true;
+        var data = new FormData();
+        data.append("file", this.blastFile);
+        axios.post(process.env.VUE_APP_BASE_URL + `/blast/${this.$route.params.phageID}/upload`,
+            data,
+            {
+              headers: {
+                "Content-Type": "multipart/form-data"
+              }
+            }
+          )
+          .then(response => {
+            console.log(response);
+            if (typeof response.data.uploaded !== "undefined") {
+              this.jsonFiles.push(this.blastFile);
+              this.blastLoading = false;
+              this.showBlastSuccessAlert = true;
+              this.showBlastDangerAlert = false;
+              this.blast = true;
+              let successMessage = `<strong>${response.data.uploaded}</strong> uploaded successfully!`;
+              Vue.nextTick(() => {
+                document.getElementById(
+                  "blast-success-alert"
+                ).innerHTML = successMessage;
+              });
+            } else if (typeof response.data.not_allowed !== "undefined") {
+              let fileExt = response.data.not_allowed.split(".").pop();
+              this.blastLoading = false;
+              this.showBlastDangerAlert = true;
+              this.showBlastSuccessAlert = false;
+              let dangerMessage = `<strong>${fileExt}</strong> is an unacceptable JSON file extension.`;
+              Vue.nextTick(() => {
+                document.getElementById(
+                  "blast-danger-alert"
+                ).innerHTML = dangerMessage;
+              });
+            }
+          })
+          .catch(error => {
+            console.log(error);
+          });
+      }
     }
   }
 };
@@ -366,4 +494,27 @@ h1 {
   margin: auto;
   width: 100%;
 }
+
+.btn-download:hover {
+  color: rgb(26, 87, 26);
+}
+
+.btn-trash:hover {
+  color: rgb(143, 27, 27);
+}
+
+.btn-download {
+  width: 48%;
+  margin: 5px;
+}
+
+.btn-trash {
+  width: 48%;
+  margin: 5px;
+}
+
+.file-list {
+  padding-top: 20px;
+}
+
 </style>
