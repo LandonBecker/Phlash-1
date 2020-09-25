@@ -517,4 +517,8 @@ h1 {
   padding-top: 20px;
 }
 
+.alert-warning {
+  margin-top: 20px;
+}
+
 </style>
